@@ -1,0 +1,5 @@
+﻿1>------ Build started: Project: ARKANOID, Configuration: Debug x64 ------
+1>MSVCRTD.lib(exe_winmain.obj) : error LNK2019: unresolved external symbol WinMain referenced in function "int __cdecl invoke_main(void)" (?invoke_main@@YAHXZ)
+1>C:\Users\Pawel Brzoza\Documents\Visual Studio 2017\Projects\C++\ARKANOID\x64\Debug\ARKANOID.exe : fatal error LNK1120: 1 unresolved externals
+1>Done building project "ARKANOID.vcxproj" -- FAILED.
+========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
