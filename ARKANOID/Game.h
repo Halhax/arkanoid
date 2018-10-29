@@ -1,39 +1,21 @@
 #pragma once
 
+#include "Menu.h"
 #include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
-#include <fstream>
+#include "Common.h"
+#include "GameState.h"
 
-using namespace std;
 using namespace sf;
-
-const float windowWidth = 800;
-const float windowHeight = 600;
-const int numberOfLevels = 3;
 
 class Game
 {
 public:
-	enum GameState { MENU, NEWGAME, OPTIONS, END };
-	GameState position;
+	RenderWindow* window = new RenderWindow(VideoMode(windowWidth, windowHeight), "ARKANOID 1.3 (beta)", Style::Default, sf::ContextSettings());
+	Menu* menu = new Menu(window);
+	GameState gameState;
 
 	Game();
 	~Game();
 
-	void runGame();
-	void openFile();
-
-protected:
-
-	Font font;
-	fstream file;
-	Music music;
-
-private:
-
-	void play();
-	void menu();
-	void options();
-	
+	void run();
 };
-

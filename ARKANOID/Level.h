@@ -1,25 +1,29 @@
 #pragma once
 
 #include <vector>
-#include <SFML/Graphics.hpp>
 #include "Brick.h"
-#include "Game.h"
+#include <SFML/Graphics.hpp>
+#include "GameState.h"
+#include "Common.h"
 
 using namespace sf;
+using namespace std;
 
-class Level :protected Game
+class Level
 {
 public:
 	static int points;
+	static int lifes;
 	
 	vector<Brick> bricks;
-	RenderWindow &window;
-	GameState &state;
-
-	Level(RenderWindow& win, GameState & st);
-	~Level(void);
+	RenderWindow* window;
+	GameState gameState;
 	
-	virtual void create(int countLevel);
-	virtual void runEngine(int countLevel);
+	Level();
+	Level(RenderWindow* win);
+	virtual ~Level();
 
+	GameState runEngine(int countLevel);
+	bool alive() const { return lifes > 0; }
+	virtual void createBricks(int countLevel);
 };

@@ -1,48 +1,35 @@
-#include <Windows.h>
 #include <fstream>
-#include <iostream>
-
+#include <string>
+#include <Windows.h>
 #include "CurrentLevel.h"
-#include "Ball.h"
-#include "Paddle.h"
-#include "Brick.h"
-#include "testCollision.h"
 
 using namespace std;
 using namespace sf;
 
-CurrentLevel::CurrentLevel(RenderWindow& win, GameState & st) : Level(win, st) {
-}
+CurrentLevel::CurrentLevel() {}
 
-CurrentLevel::~CurrentLevel(void)
+CurrentLevel::CurrentLevel(RenderWindow* win) : Level(win) {}
+
+CurrentLevel::~CurrentLevel() {}
+
+void CurrentLevel::createBricks(int countLevel)
 {
-}
-
-void CurrentLevel::create(int countLevel)
-{
-
-	points = 0;
-	cout << countLevel;
+	string line;
+	fstream patternFile;
 	
-	fstream file;
-	
-	file.open("data/pattern" + to_string(countLevel) + ".txt");
+	patternFile.open("data/pattern" + to_string(countLevel) + ".txt");
 
-	if (!file.good())
+	if (!patternFile.good())
 	{
-		system("pause");
+		MessageBox(window->getSystemHandle(), (LPCWSTR)L"Pattern file not found!", (LPCWSTR)L"ERROR! - missing element", MB_ICONERROR | MB_OKCANCEL);
 		exit(0);
 	}
 
-	string lol;
 	for (int iY = 0; iY < countBlocksY; iY++)
 	{
-		getline(file, lol);
+		getline(patternFile, line);
 		for (int iX = 0; iX < countBlocksX; iX++)
-		{
-			if (lol[iX] == '+')
+			if (line[iX] == '+')
 				bricks.emplace_back((iX + 1) * (blockWidth + 3) + 22, (iY + 2) * (blockHeight + 3));
-
-		}
 	}
 }

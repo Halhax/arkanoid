@@ -2,10 +2,7 @@
 
 int main()
 {
-
 	Game game;
-	game.runGame();
-
-	return EXIT_SUCCESS;
-
+	game.run();
+	return 0;
 }

@@ -8,11 +8,9 @@ using namespace sf;
 class CurrentLevel : public Level
 {
 public:
+	CurrentLevel();
+	CurrentLevel(RenderWindow* win);
+	~CurrentLevel();
 
-	CurrentLevel(RenderWindow& win, GameState& state);
-	~CurrentLevel(void);
-
-	void create(int countLevel);
-
+	void createBricks(int countLevel);
 };
-

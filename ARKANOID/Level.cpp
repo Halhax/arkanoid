@@ -1,133 +1,166 @@
-#include <Windows.h>
-#include "SFML/Audio.hpp"
 #include "Level.h"
 #include "Ball.h"
 #include "Paddle.h"
-#include "Brick.h"
-#include "testCollision.h"
-#include <fstream>
-#include <iostream>
+#include <Windows.h>
+#include "TestCollision.h"
 
-using namespace std;
 using namespace sf;
 
 int Level::points(0);
+int Level::lifes(numberOfLifes);
 
-Level::Level(RenderWindow & win, GameState & st):window(win), state(st) {
+Level::Level() {}
 
-	
-}
+Level::Level(RenderWindow *win) : window(win) {}
 
-Level::~Level(void)
+GameState Level::runEngine(int currentLevel)
 {
-}
-
-void Level::create(int countLevel)
-{
-}
-
-void Level::runEngine(int countLevel)
-{
-	create(countLevel);
-
-	window.setFramerateLimit(60);
+	createBricks(currentLevel);
 
 	Ball ball(windowWidth / 2, windowHeight / 2);
 	Paddle paddle(windowWidth / 2, windowHeight - 50);
 	
-	Text statistic("POINTS: ", font, 20);
-	statistic.setPosition(20, 565);
-	statistic.setColor(Color::Black);
+	Text textBoxPoints("POINTS: ", font, 20);
+	textBoxPoints.setPosition(20, 565);
+	textBoxPoints.setFillColor(Color::Black);
 
-	Text point;
-	point.setCharacterSize(20);
-	point.setColor(Color::Black);
-	point.setPosition(110, 565);
-	point.setFont(font);
+	Text textPoints;
+	textPoints.setCharacterSize(20);
+	textPoints.setFillColor(Color::Black);
+	textPoints.setPosition(110, 565);
+	textPoints.setFont(font);
 
-	Text lives("LIVES: ", font, 20);
-	lives.setPosition(700, 565);
-	lives.setColor(Color::Black);
+	Text textBoxLives("LIVES: ", font, 20);
+	textBoxLives.setPosition(700, 565);
+	textBoxLives.setFillColor(Color::Black);
 
-	Text live;
-	live.setCharacterSize(20);
-	live.setColor(Color::Black);
-	live.setPosition(770, 565);
-	live.setFont(font);
+	Text textLives;
+	textLives.setCharacterSize(20);
+	textLives.setFillColor(Color::Black);
+	textLives.setPosition(770, 565);
+	textLives.setFont(font);
+
+	Text level_num("Level: " + to_string(currentLevel), font, 60);
+	level_num.setPosition(windowWidth / 2 - level_num.getGlobalBounds().width / 2,
+		windowHeight / 2 - level_num.getGlobalBounds().height / 2);
+	level_num.setFillColor(Color::Black);
+	window->clear(Color::White);
+	window->draw(level_num);
+	window->display();
+	Sleep(2000);
 
 	Event event;
 
-	while (state == NEWGAME)
-	{
-		window.pollEvent(event);
+	gameState = NEWGAME;
 
-		if (event.key.code == Keyboard::Escape)
-			state = MENU;
+	while (gameState == NEWGAME)
+	{
+		window->pollEvent(event);
+
+		if (event.key.code == Keyboard::Escape) {
+			gameState = MENU;
+			return gameState;
+		}
 
 		if (event.type == Event::Closed)
 			exit(0);
 
 		if (ball.update() == true)
 		{
-			--ball;
+			--lifes;
 
-			if (!ball.alive())
+			if (!alive())
 			{
 				Text game_over("GAME OVER", font, 60);
 				game_over.setPosition(windowWidth / 2 - game_over.getGlobalBounds().width / 2,
 					windowHeight / 2 - game_over.getGlobalBounds().height / 2);
-				game_over.setColor(Color::Black);
-				window.clear(Color::White);
-				window.draw(game_over);
-				window.display();
-				Sleep(2000);
-				state = MENU;
+				textPoints.setPosition(windowWidth / 2 - game_over.getGlobalBounds().width / 2 + 240,
+					windowHeight / 2 - game_over.getGlobalBounds().height / 2 + 80);
+				textBoxPoints.setPosition(windowWidth / 2 - game_over.getGlobalBounds().width / 2 + 110,
+					windowHeight / 2 - game_over.getGlobalBounds().height / 2 + 80);
+				textPoints.setCharacterSize(30);
+				textBoxPoints.setCharacterSize(30);
+				game_over.setFillColor(Color::Black);
+				window->clear(Color::White);
+				window->draw(game_over);
+				window->draw(textPoints);
+				window->draw(textBoxPoints);
+				window->display();
+				Sleep(4000);
+				gameState = MENU;
+				return gameState;
 			}
 		}
 
 		paddle.update();
 		testCollision(paddle, ball);
 
-		window.clear(Color::White);
+		window->setFramerateLimit(60);
+		window->clear(Color::White);
 
-		window.draw(ball.shape);
-		window.draw(paddle.shape);
+		window->draw(ball.ballShape);
+		window->draw(paddle.paddleShape);
 
-		live.setString(to_string(ball.getLifes()));
-		window.draw(live);
-		window.draw(lives);
+		textLives.setString(to_string(lifes));
+		window->draw(textLives);
+		window->draw(textBoxLives);
 
-		point.setString(to_string(points));
-		window.draw(point);
-		window.draw(statistic);
-
-		// for (int i = 0; i < bricks.size(); i++) window.draw(bricks[i].shape);
+		textPoints.setString(to_string(points));
+		window->draw(textPoints);
+		window->draw(textBoxPoints);
 
 		for (auto& brick : bricks)
 		{
-			window.draw(brick.shape);
+			window->draw(brick.brickShape);
 			if (testCollision(brick, ball) == true)
 				points++;
 		}
-		// algoritm STL
-		// cool C++11 lambda!
 
-		bricks.erase(remove_if(begin(bricks), end(bricks), [](const Brick& mBrick) { return mBrick.destroyed; }), end(bricks));
+		// algoritm STL - cool C++11 lambda!
+		bricks.erase(remove_if(bricks.begin(), bricks.end(), [](const Brick& mBrick) { return mBrick.destroyed; }), bricks.end());
 
 		if (bricks.empty() == true)
 		{
-			Text game_over("YOU WIN !", font, 60);
-			game_over.setPosition(windowWidth / 2 - game_over.getGlobalBounds().width / 2,
-				windowHeight / 2 - game_over.getGlobalBounds().height / 2);
-			game_over.setColor(Color::Black);
-			window.clear(Color::White);
-			window.draw(game_over);
-			window.display();
+			if (currentLevel == numberOfLevels) {
+				Text game_over("YOU WIN !", font, 60);
+				game_over.setPosition(windowWidth / 2 - game_over.getGlobalBounds().width / 2,
+					windowHeight / 2 - game_over.getGlobalBounds().height / 2);
+				textPoints.setPosition(windowWidth / 2 - game_over.getGlobalBounds().width / 2 + 230,
+					windowHeight / 2 - game_over.getGlobalBounds().height / 2 + 80);
+				textBoxPoints.setPosition(windowWidth / 2 - game_over.getGlobalBounds().width / 2 + 90,
+					windowHeight / 2 - game_over.getGlobalBounds().height / 2 + 80);
+				textPoints.setCharacterSize(30);
+				textBoxPoints.setCharacterSize(30);
+				game_over.setFillColor(Color::Black);
+				window->clear(Color::White);
+				window->draw(game_over);
+				window->draw(textPoints);
+				window->draw(textBoxPoints);
+				window->display();
+				Sleep(4000);
+				gameState = MENU;
+				return gameState;
+			}
+
+			Text level_num("Level: " + to_string(currentLevel + 1), font, 60);
+			level_num.setPosition(windowWidth / 2 - level_num.getGlobalBounds().width / 2,
+				windowHeight / 2 - level_num.getGlobalBounds().height / 2);
+			level_num.setFillColor(Color::Black);
+			window->clear(Color::White);
+			window->draw(level_num);
+			window->display();
 			Sleep(2000);
-			
 			break;
 		}
-
-		window.display();
+		window->display();
 	}
+	gameState = NEWGAME;
+	return gameState;
+}
+
+void Level::createBricks(int countLevel) {}
+
+Level::~Level() {
+	lifes = numberOfLifes;
+	points = 0;
 }
