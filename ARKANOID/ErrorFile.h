@@ -8,9 +8,9 @@ using namespace sf;
 
 class ErrorFile: public Error
 {
+	std::shared_ptr<RenderWindow> window;
 public:
-	RenderWindow* window;
-	ErrorFile(RenderWindow* win) : window(win) {}
+	ErrorFile(std::shared_ptr<RenderWindow> win) : window(win) {}
 
 	virtual void error()
 	{

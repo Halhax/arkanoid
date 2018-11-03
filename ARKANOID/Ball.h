@@ -5,8 +5,8 @@
 
 using namespace sf;
 
+const float constBallVelocity = 6;
 const float ballRadius = 10;
-const float constBallVelocity = 8;
 
 class Ball
 {
@@ -15,6 +15,7 @@ public:
 	CircleShape ballShape;
 	Vector2f ballVelocity{ 0, constBallVelocity };
 
+	Ball() {}
 	Ball(float mX, float mY)
 	{
 		ballShape.setPosition(mX, mY);

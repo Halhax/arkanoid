@@ -8,22 +8,24 @@
 #include "Common.h"
 
 using namespace sf;
+using namespace std;
 
 class Menu
 {
-public:
 	bool musicStatus;
-	RenderWindow* window;
+	shared_ptr<RenderWindow> window;
 	SoundSource::Status actualMusicStatus;
 	Music music;
 	GameState gameState;
-	std::fstream configFile;
-	
+	fstream configFile;
+	void loadConfigFile();
+
+public:
+	static int controlMouse;
 	Menu();
-	Menu(RenderWindow* win);
+	Menu(shared_ptr<RenderWindow> win);
 
 	GameState menu();
 	GameState play();
 	GameState options();
-	void loadConfigFile();
 };

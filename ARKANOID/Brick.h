@@ -7,14 +7,10 @@ using namespace sf;
 const float blockWidth = 60;
 const float blockHeight = 20;
 
-const int countBlocksX = 11;
-const int countBlocksY = 7;
-
 class Brick
 {
 public:
 	RectangleShape brickShape;
-
 	bool destroyed = false;
 
 	Brick(float mX, float mY)

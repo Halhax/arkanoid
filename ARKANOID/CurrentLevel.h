@@ -3,14 +3,14 @@
 #include <SFML/Graphics.hpp>
 #include "Level.h"
 
+using namespace std;
 using namespace sf;
 
 class CurrentLevel : public Level
 {
+	void createBricks();
 public:
+	GameState run();
 	CurrentLevel();
-	CurrentLevel(RenderWindow* win);
-	~CurrentLevel();
-
-	void createBricks(int countLevel);
+	CurrentLevel(shared_ptr<RenderWindow> win, int currentLevel);
 };

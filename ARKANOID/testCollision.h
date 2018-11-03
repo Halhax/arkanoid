@@ -20,38 +20,63 @@ void testCollision(Paddle& mPaddle, Ball& mBall)
 
 	mBall.ballVelocity.y = -constBallVelocity;
 
-	if (mBall.x() < mPaddle.x() + 25 && mBall.x() > mPaddle.x() - 25)
+	if (mBall.x() < mPaddle.x() + 1 && mBall.x() > mPaddle.x() - 1)
 	{
 		mBall.ballVelocity.x = 0;
-		mBall.ballVelocity.y = -constBallVelocity;
 	}
-	else if (mBall.x() < mPaddle.x())
-		mBall.ballVelocity.x = -constBallVelocity;
-	else
-		mBall.ballVelocity.x = constBallVelocity;
+	else if (mBall.x() < mPaddle.x()) {
+		if (mBall.x() < mPaddle.x() - 35) {
+			mBall.ballVelocity.x = -constBallVelocity;
+		}
+		else if (mBall.x() < mPaddle.x() - 20) {
+			mBall.ballVelocity.x = -(constBallVelocity / 2);
+		}
+		else if (mBall.x() < mPaddle.x() - 10) {
+			mBall.ballVelocity.x = -(constBallVelocity / 3);
+		}
+		else if (mBall.x() < mPaddle.x() - 1) {
+			mBall.ballVelocity.x = -(constBallVelocity / 4);
+		}
+	}
+	else {
+		if (mBall.x() > mPaddle.x() + 35) {
+			mBall.ballVelocity.x = constBallVelocity;;
+		}
+		else if (mBall.x() > mPaddle.x() + 20) {
+			mBall.ballVelocity.x = (constBallVelocity / 2);
+		}
+		else if (mBall.x() > mPaddle.x() + 10) {
+			mBall.ballVelocity.x = (constBallVelocity / 3);
+		}
+		else if (mBall.x() > mPaddle.x() + 1) {
+			mBall.ballVelocity.x = (constBallVelocity / 4);
+		}
+	}
 }
 
 bool testCollision(Brick& mBrick, Ball& mBall)
 {
-	if (!isIntersecting(mBrick, mBall)) return false;
+	if (!isIntersecting(mBrick, mBall))
+		return false;
+	else {
+		mBrick.destroyed = true;
 
-	mBrick.destroyed = true;
+		float overlapLeft(mBall.right() - mBrick.left());
+		float overlapRight(mBrick.right() - mBall.left());
+		float overlapTop(mBall.bottom() - mBrick.top());
+		float overlapBottom(mBrick.bottom() - mBall.top());
 
-	float overlapLeft(mBall.right() - mBrick.left());
-	float overlapRight(mBrick.right() - mBall.left());
-	float overlapTop(mBall.bottom() - mBrick.top());
-	float overlapBottom(mBrick.bottom() - mBall.top());
+		bool ballFromLeft(abs(overlapLeft) < abs(overlapRight));
+		bool ballFromTop(abs(overlapTop) < abs(overlapBottom));
 
-	bool ballFromLeft(abs(overlapLeft) < abs(overlapRight));
-	bool ballFromTop(abs(overlapTop) < abs(overlapBottom));
+		float minOverlapX{ ballFromLeft ? overlapLeft : overlapRight };
+		float minOverlapY{ ballFromTop ? overlapTop : overlapBottom };
 
-	float minOverlapX{ ballFromLeft ? overlapLeft : overlapRight };
-	float minOverlapY{ ballFromTop ? overlapTop : overlapBottom };
+		if (abs(minOverlapX) < abs(minOverlapY))
+			mBall.ballVelocity.x = ballFromLeft ? -constBallVelocity : constBallVelocity;
+		else
+			mBall.ballVelocity.y = ballFromTop ? -constBallVelocity : constBallVelocity;
 
-	if (abs(minOverlapX) < abs(minOverlapY))
-		mBall.ballVelocity.x = ballFromLeft ? -constBallVelocity : constBallVelocity;
-	else
-		mBall.ballVelocity.y = ballFromTop ? -constBallVelocity : constBallVelocity;
-
-	return true;
+		return true;
+	}
 }

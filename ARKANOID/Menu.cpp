@@ -8,9 +8,11 @@
 
 Font font;
 
+int Menu::controlMouse = false;
+
 Menu::Menu() {}
 
-Menu::Menu(RenderWindow* win): window(win) {
+Menu::Menu(std::shared_ptr<RenderWindow> win) : window(win) {
 
 	if (!font.loadFromFile("data/JOKERMAN.TTF"))
 	{
@@ -24,8 +26,6 @@ Menu::Menu(RenderWindow* win): window(win) {
 	}
 
 	loadConfigFile();
-	configFile >> musicStatus;
-	configFile.close();
 
 	gameState = MENU;
 }
@@ -109,22 +109,48 @@ GameState Menu::options()
 
 	Text txt1[count];
 	Text txt2[count];
-	string str1[] = { "Control: ", "Music: " };
-	string str2[] = { "ON", "OFF" };
+	Text txt3[count];
+	string options[] = { "Control: ", "Music: " };
+	string musicOptions[] = { "ON", "OFF" };
+	string controlOptions[] = { "Mouse", "Keyboard" };
 
 	for (int i = 0; i < count; i++)
 	{
 		txt1[i].setFont(font);
 		txt1[i].setCharacterSize(40);
-		txt1[i].setString(str1[i]);
-		txt1[i].setPosition((float)800 / (float)2 - txt1[i].getGlobalBounds().width / (float)2 - 80, (float)200 + i * (float)120 + 10);
+		txt1[i].setString(options[i]);
+		txt1[i].setPosition((float)800 / (float)2 - txt1[i].getGlobalBounds().width / (float)2 - 200, (float)200 + i * (float)120 + 10);
 		txt1[i].setFillColor(Color::White);
 
 		txt2[i].setFont(font);
 		txt2[i].setCharacterSize(40);
-		txt2[i].setString(str2[i]);
+		txt2[i].setString(musicOptions[i]);
 		txt2[i].setPosition((float)800 / (float)2 + txt1[i].getGlobalBounds().width / (float)2 + i * (float)120 - 80, (float)200 + (float)120 + 10);
 		txt2[i].setFillColor(Color::White);
+
+		txt3[i].setFont(font);
+		txt3[i].setCharacterSize(40);
+		txt3[i].setString(controlOptions[i]);
+		txt3[i].setPosition((float)800 / (float)2 + txt3[i].getGlobalBounds().width / (float)2 + i * (float)120 - 140, (float)200 + 10);
+		txt3[i].setFillColor(Color::White);
+	}
+
+	if (musicStatus) {
+		txt2[0].setFillColor(Color::Cyan);
+		txt2[1].setFillColor(Color::White);
+	}
+	else {
+		txt2[0].setFillColor(Color::White);
+		txt2[1].setFillColor(Color::Cyan);
+	}
+
+	if (controlMouse) {
+		txt3[0].setFillColor(Color::Cyan);
+		txt3[1].setFillColor(Color::White);
+	}
+	else {
+		txt3[0].setFillColor(Color::White);
+		txt3[1].setFillColor(Color::Cyan);
 	}
 
 	Event event;
@@ -146,6 +172,8 @@ GameState Menu::options()
 			configFile.open("data/musicStateSave.txt", ios::out);
 			configFile << '1';
 			configFile.close();
+			txt2[0].setFillColor(Color::Cyan);
+			txt2[1].setFillColor(Color::White);
 		}
 
 		else if (txt2[1].getGlobalBounds().contains(mouse) &&
@@ -156,19 +184,38 @@ GameState Menu::options()
 			configFile << '0';
 			configFile.close();
 			musicStatus = 0;
+			txt2[0].setFillColor(Color::White);
+			txt2[1].setFillColor(Color::Cyan);
+		}
+		if (txt3[0].getGlobalBounds().contains(mouse) &&
+			event.type == Event::MouseButtonPressed && event.key.code == Mouse::Left)
+		{
+			configFile.open("data/controlMouse.txt", ios::out);
+			configFile << '1';
+			configFile.close();
+			controlMouse = true;
+			txt3[0].setFillColor(Color::Cyan);
+			txt3[1].setFillColor(Color::White);
 		}
 
-		for (int i = 0; i < count; i++)
-			if (txt2[i].getGlobalBounds().contains(mouse))
-				txt2[i].setFillColor(Color::Cyan);
-			else txt2[i].setFillColor(Color::White);
+		else if (txt3[1].getGlobalBounds().contains(mouse) &&
+			event.type == Event::MouseButtonPressed && event.key.code == Mouse::Left)
+		{
+			configFile.open("data/controlMouse.txt", ios::out);
+			configFile << '0';
+			configFile.close();
+			controlMouse = false;
+			txt3[0].setFillColor(Color::White);
+			txt3[1].setFillColor(Color::Cyan);
+		}
 
 		window->clear();
 
-		for (int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++) {
 			window->draw(txt1[i]);
-		for (int i = 0; i < count; i++)
 			window->draw(txt2[i]);
+			window->draw(txt3[i]);
+		}
 
 		window->draw(title);
 		window->display();
@@ -178,28 +225,30 @@ GameState Menu::options()
 
 void Menu::loadConfigFile()
 {
-	Error *wsk = new ErrorFile(window);
-	try
-	{
-		configFile.open("data/musicStateSave.txt");
-		if (!configFile.good())
-		{
-			throw wsk;
-		}
-	}
-	catch (Error *w)
-	{
-		w->error();
-	}
-	delete wsk;
+	unique_ptr<Error> ptr = make_unique<ErrorFile>(window);
+	
+	configFile.open("data/musicStateSave.txt");
+	if (!configFile.good())
+		ptr->error();
+
+	configFile >> musicStatus;
+	configFile.close();
+
+	configFile.open("data/controlMouse.txt");
+	if (!configFile.good())
+		ptr->error();
+
+	configFile >> controlMouse;
+	configFile.close();
 }
 
 GameState Menu::play()
 {
-	Level* level = new CurrentLevel(window);
+	Level* level;
 	for (int i = 1; i <= numberOfLevels; i++)
 	{
-		gameState = level->runEngine(i);
+		level = new CurrentLevel(window, i);
+		gameState = level->run();
 		if(gameState == MENU)
 			break;
 	}

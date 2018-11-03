@@ -3,26 +3,23 @@
 #include <Windows.h>
 #include "CurrentLevel.h"
 
-using namespace std;
 using namespace sf;
+GameState CurrentLevel::run() {
+	createBricks();
+	return runEngine();
+}
 
-CurrentLevel::CurrentLevel() {}
-
-CurrentLevel::CurrentLevel(RenderWindow* win) : Level(win) {}
-
-CurrentLevel::~CurrentLevel() {}
-
-void CurrentLevel::createBricks(int countLevel)
+void CurrentLevel::createBricks()
 {
 	string line;
 	fstream patternFile;
-	
-	patternFile.open("data/pattern" + to_string(countLevel) + ".txt");
+
+	patternFile.open("data/pattern" + to_string(currentLevel) + ".txt");
 
 	if (!patternFile.good())
 	{
 		MessageBox(window->getSystemHandle(), (LPCWSTR)L"Pattern file not found!", (LPCWSTR)L"ERROR! - missing element", MB_ICONERROR | MB_OKCANCEL);
-		exit(0);
+		return;
 	}
 
 	for (int iY = 0; iY < countBlocksY; iY++)
@@ -33,3 +30,10 @@ void CurrentLevel::createBricks(int countLevel)
 				bricks.emplace_back((iX + 1) * (blockWidth + 3) + 22, (iY + 2) * (blockHeight + 3));
 	}
 }
+
+CurrentLevel::CurrentLevel() {}
+
+CurrentLevel::CurrentLevel(shared_ptr<RenderWindow> win, int currentLevel) : Level(win, currentLevel) {
+	this->currentLevel = currentLevel;
+}
+

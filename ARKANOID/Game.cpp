@@ -1,10 +1,7 @@
 #include "Game.h"
 #include "Common.h"
 
-Game::Game()
-{
-	gameState = MENU;
-}
+Game::Game() : gameState(MENU) {}
 
 void Game::run()
 {
@@ -23,9 +20,4 @@ void Game::run()
 			break;
 		}
 	}
-}
-
-Game::~Game() {
-	delete window;
-	delete menu;
 }
